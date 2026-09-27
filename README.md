@@ -132,6 +132,30 @@ python cli.py --brd samples/sample_brd.md -o output/report.xlsx \
 pytest -q
 ```
 
+## API key & secrets
+
+The key is never committed. Configuration is read, in order of precedence, from:
+1. real environment variables
+2. Streamlit secrets – `.streamlit/secrets.toml` locally, or the **Secrets** box on Streamlit Community Cloud
+3. `.env` (local development)
+
+Both `.env` and `.streamlit/secrets.toml` are git-ignored; templates are `.env.example` and
+`.streamlit/secrets.toml.example`.
+
+## Deploy on Streamlit Community Cloud
+
+1. Go to https://share.streamlit.io, sign in with GitHub, click **Create app → Deploy a public app from GitHub**.
+2. Repository `kantamprakash/TechRiskAI`, branch `main`, main file path **`ui/streamlit_app.py`**.
+3. **Advanced settings**: Python version **3.12**, and paste the contents of `.streamlit/secrets.toml.example`
+   into **Secrets** with your real `OPENROUTER_API_KEY`.
+4. Deploy. Secrets can be changed later under App → Settings → Secrets (the app restarts automatically).
+
+Notes:
+- Anyone who can open the app uses *your* OpenRouter key/quota. Restrict viewers under App → Settings → Sharing,
+  and keep `LLM_PAID_FALLBACK_MODELS` empty (or set a credit limit on the key) to cap spending.
+- The cloud file system is temporary: the knowledge-base vector DB is rebuilt automatically after a restart.
+- Uploaded documents are sent to OpenRouter model providers; free-model providers may log prompts.
+
 ## Project layout
 
 ```

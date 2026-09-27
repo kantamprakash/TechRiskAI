@@ -1,5 +1,6 @@
 """Streamlit UI: streamlit run ui/streamlit_app.py"""
 import dataclasses
+import os
 import sys
 from pathlib import Path
 
@@ -8,11 +9,26 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import pandas as pd
 import streamlit as st
 
-from app.config import settings
-from app.excel_report import to_excel_bytes
-from app.llm import LLMError, build_llm, resolve_sizing
-from app.parsing import SUPPORTED_EXTENSIONS, load_document
-from app.pipeline import run_analysis
+
+def _load_streamlit_secrets() -> None:
+    """Expose top-level Streamlit secrets (.streamlit/secrets.toml locally, the app's Secrets settings on
+    Streamlit Community Cloud) as environment variables, before app.config reads them.
+    Precedence: real environment variables > Streamlit secrets > .env file."""
+    try:
+        for key, value in st.secrets.items():
+            if isinstance(value, (str, int, float, bool)):
+                os.environ.setdefault(key, str(value))
+    except Exception:  # no secrets file configured
+        pass
+
+
+_load_streamlit_secrets()
+
+from app.config import settings  # noqa: E402  (must be imported after secrets are loaded)
+from app.excel_report import to_excel_bytes  # noqa: E402
+from app.llm import LLMError, build_llm, resolve_sizing  # noqa: E402
+from app.parsing import SUPPORTED_EXTENSIONS, load_document  # noqa: E402
+from app.pipeline import run_analysis  # noqa: E402
 
 SUGGESTED_MODELS = [
     "anthropic/claude-sonnet-5",
